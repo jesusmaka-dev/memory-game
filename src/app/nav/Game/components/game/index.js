@@ -1,25 +1,26 @@
 'use client';
 import {useEffect, useState} from 'react';
 import Modal from '@/app/utils/components/Modal';
+import ModalInstructions from '@/app/utils/components/ModalInstructions';
 
 export default function GameComponent() {
   const [showModal, setShowModal] = useState(false);
+  const [showModalInstructions, setShowModalInstructions] = useState(true);
   const [dataCardArray, setDataCardArray] = useState([]);
+  const [userName, setUserName] = useState('');
   const [dataCardArrayOriginal, setDataCardArrayOriginal] = useState([]);
   const [selectedCard, setSelectedCard] = useState([]);
   const [failures, setFailures] = useState(0);
   const [succeeds, setSucceeds] = useState(0);
 
   const url =
-    'https://fed-team.modyo.cloud/api/content/spaces/animals/types/game/entries?per_page=3';
-
-  const fetchInfo = () => {
-    return fetch(url)
-      .then(res => res.json())
-      .then(images => images);
-  };
+    'https://fed-team.modyo.cloud/api/content/spaces/animals/types/game/entries?per_page=7';
 
   useEffect(() => {
+    const userNameSessionStorage = sessionStorage.getItem('nameUser');
+
+    setUserName(userNameSessionStorage);
+
     fetchInfo()
       .then(r => handleImageForCards(r))
       .catch(err =>
@@ -36,6 +37,20 @@ export default function GameComponent() {
       }
     }
   }, [succeeds]);
+
+  const fetchInfo = () => {
+    return fetch(url)
+      .then(res => res.json())
+      .then(images => images);
+  };
+
+  const shuffleData = array => {
+    // Fisher Yates Modern method for shuffle data in array
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  };
 
   const handleImageForCards = images => {
     const dataImages = images.entries;
@@ -55,11 +70,7 @@ export default function GameComponent() {
 
     setDataCardArrayOriginal(mergedArray);
 
-    // Fisher Yates Modern method for shuffle data in array
-    for (let i = mergedArray.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [mergedArray[i], mergedArray[j]] = [mergedArray[j], mergedArray[i]];
-    }
+    shuffleData(mergedArray);
 
     setDataCardArray(mergedArray);
   };
@@ -110,11 +121,7 @@ export default function GameComponent() {
   const handleOnCloseModal = e => {
     const data = [...dataCardArrayOriginal];
 
-    // Fisher Yates Modern method for shuffle data in array
-    for (let i = data.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [data[i], data[j]] = [data[j], data[i]];
-    }
+    shuffleData(data);
 
     data.forEach(dta => {
       dta.selected = false;
@@ -131,9 +138,15 @@ export default function GameComponent() {
   return (
     <main className="flex min-h-screen flex-col items-center p-24 pt-10 bg-gradient-to-r from-sky-500 to-indigo-500">
       <Modal show={showModal} onClose={e => handleOnCloseModal(e)} />
-      <div className="flex gap-20 justify-center mb-10 bg-cyan-300 p-10 rounded-md">
-        <p>Errores : {failures}</p>
-        <p>Aciertos : {succeeds}</p>
+      <ModalInstructions show={showModalInstructions} />
+      <div className="mb-10 bg-cyan-300 p-10 rounded-md">
+        <div className="flex justify-center mb-5">
+          <p>¡Hola, {userName}!</p>
+        </div>
+        <div className="flex gap-20 justify-center">
+          <p>Errores : {failures}</p>
+          <p>Aciertos : {succeeds}</p>
+        </div>
       </div>
       <div className="container mx-auto bg-gray-100 border-slate-700 p-20 rounded-md shadow-lg bg-gradient-to-r from-cyan-500 to-blue-500">
         <div className="flex flex-wrap gap-20 justify-center">
