@@ -15,6 +15,14 @@ export default function Welcome() {
     }
   }, [user]);
 
+  useEffect(() => {
+    const getUserName = sessionStorage.getItem('nameUser');
+
+    if (getUserName) {
+      router.push('/nav/Game');
+    }
+  }, []);
+
   const handleLogin = e => {
     e.preventDefault();
     sessionStorage.setItem('nameUser', user);
@@ -23,7 +31,7 @@ export default function Welcome() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-sky-500 to-indigo-500">
-      <div className="max-w-md w-full space-y-8">
+      <div className="max-w-md space-y-8">
         <div>
           <h2 className="text-center text-3xl font-extrabold text-gray-900">
             Modyo Games
